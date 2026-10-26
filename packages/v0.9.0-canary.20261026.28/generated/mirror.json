@@ -1,0 +1,54 @@
+{
+  "source_repository": "pasical/Everywhere",
+  "source_release_id": 424293913,
+  "source_commit": "89cbb79eca48e508f45f27fc47638ac05c0d024f",
+  "tag": "v0.9.0-canary.20261026.28",
+  "upstream_assets": [
+    {
+      "id": 678277601,
+      "name": "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.AppImage",
+      "size": 76425736,
+      "digest": "sha256:3d98f15bb86251fa5140353e85ed2826479f072dddade02750360a8b1be117d5"
+    },
+    {
+      "id": 678277598,
+      "name": "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.deb",
+      "size": 66012644,
+      "digest": "sha256:12bbcd0ce572ef2058e04755eb6acc80b376743af10f797e58439a68da81b3ca"
+    },
+    {
+      "id": 678277592,
+      "name": "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.tar.zst",
+      "size": 66128496,
+      "digest": "sha256:753bcae75d465d8115e729257a02fce0a31117d771ce511e2ba22e90ef79a01d"
+    },
+    {
+      "id": 678277596,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.AppImage",
+      "size": 78998008,
+      "digest": "sha256:72f650462337e276d0e11b446cbc3b6f14f7e06f1b71a54f90fffc6778fa320b"
+    },
+    {
+      "id": 678277590,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.deb",
+      "size": 68671120,
+      "digest": "sha256:4ba67a64e01f27f562d6cb978f0e375a7905ee9ec7eea13c2d8c2747854be38a"
+    },
+    {
+      "id": 678277595,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.tar.zst",
+      "size": 68981933,
+      "digest": "sha256:4658e85126dd5101c84be01e16685d864ccedb6235b7543e47bc711c1c4db320"
+    }
+  ],
+  "sha256": {
+    "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.AppImage": "3d98f15bb86251fa5140353e85ed2826479f072dddade02750360a8b1be117d5",
+    "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.deb": "12bbcd0ce572ef2058e04755eb6acc80b376743af10f797e58439a68da81b3ca",
+    "Everywhere-Linux-arm64-v0.9.0-canary.20261026.28.tar.zst": "753bcae75d465d8115e729257a02fce0a31117d771ce511e2ba22e90ef79a01d",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.AppImage": "72f650462337e276d0e11b446cbc3b6f14f7e06f1b71a54f90fffc6778fa320b",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.deb": "4ba67a64e01f27f562d6cb978f0e375a7905ee9ec7eea13c2d8c2747854be38a",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261026.28.tar.zst": "4658e85126dd5101c84be01e16685d864ccedb6235b7543e47bc711c1c4db320",
+    "LICENSE": "1afb97b109ac6dc78fee57f86e854abe75bbdffb12b40d36c91084b12efa96a2",
+    "Everywhere-icon.png": "ef52179d078f3ee23a1eec9ded2dbb8a9529de49dd4412375fea7566f9f83c34"
+  }
+}
