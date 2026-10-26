@@ -1,0 +1,24 @@
+name: Validate release automation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - run: python3 -m unittest discover -s tests -v
+      - run: bash -n scripts/publish_aur.sh
+  arch-package:
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    steps:
+      - run: |
+          sed -i '/^\[options\]/a DisableSandbox' /etc/pacman.conf
+          pacman -Syu --noconfirm git python desktop-file-utils
+          useradd -m builder
+      - uses: actions/checkout@v6
+      - run: sudo -u builder bash tests/test-package.sh
+      - run: sudo -u builder bash tests/test-publish.sh

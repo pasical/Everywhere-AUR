@@ -1,0 +1,82 @@
+name: Mirror Linux release and update AUR
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published upstream tag, including v
+        required: true
+        type: string
+      publish_aur:
+        description: Build and push everywhere-bin after mirroring
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Deduplicate a tag without dropping intermediate releases from other tags.
+concurrency:
+  group: everywhere-aur-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Mirror requested release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_REPOSITORY: ${{ vars.UPSTREAM_REPOSITORY || 'pasical/Everywhere' }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python3 scripts/sync_release.py --tag "$RELEASE_TAG"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aur-recipe
+          path: out/
+          if-no-files-found: error
+
+  publish-aur:
+    needs: mirror
+    if: ${{ inputs.publish_aur }}
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    steps:
+      - name: Prepare Arch build user
+        run: |
+          # Pacman's download sandbox needs syscalls unavailable in some container runtimes.
+          sed -i '/^\[options\]/a DisableSandbox' /etc/pacman.conf
+          pacman -Syu --noconfirm git openssh pacman-contrib desktop-file-utils
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: aur-recipe
+          path: out
+      - name: Validate package and push AUR
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          AUR_USERNAME: ${{ secrets.AUR_USERNAME }}
+          AUR_EMAIL: ${{ secrets.AUR_EMAIL }}
+          AUR_SSH_KNOWN_HOSTS: ${{ vars.AUR_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AUR_SSH_PRIVATE_KEY" || { echo 'Configure AUR_SSH_PRIVATE_KEY in Everywhere-AUR.' >&2; exit 1; }
+          test -n "$AUR_SSH_KNOWN_HOSTS" || { echo 'Configure verified AUR_SSH_KNOWN_HOSTS in Everywhere-AUR.' >&2; exit 1; }
+          eval "$(ssh-agent -s)"
+          trap 'ssh-agent -k >/dev/null' EXIT
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" | ssh-add -
+          unset AUR_SSH_PRIVATE_KEY
+          install -d -m 700 -o builder -g builder /home/builder/.ssh
+          printf '%s\n' "$AUR_SSH_KNOWN_HOSTS" > /home/builder/.ssh/known_hosts
+          chown builder:builder /home/builder/.ssh/known_hosts
+          chmod 600 /home/builder/.ssh/known_hosts
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          # The agent socket's parent is private; grant the build user access.
+          chown builder:builder "$SSH_AUTH_SOCK" "$(dirname "$SSH_AUTH_SOCK")"
+          sudo --preserve-env=SSH_AUTH_SOCK,AUR_USERNAME,AUR_EMAIL -u builder bash scripts/publish_aur.sh out/PKGBUILD
