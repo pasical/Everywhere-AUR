@@ -68,15 +68,10 @@ jobs:
           set -euo pipefail
           test -n "$AUR_SSH_PRIVATE_KEY" || { echo 'Configure AUR_SSH_PRIVATE_KEY in Everywhere-AUR.' >&2; exit 1; }
           test -n "$AUR_SSH_KNOWN_HOSTS" || { echo 'Configure verified AUR_SSH_KNOWN_HOSTS in Everywhere-AUR.' >&2; exit 1; }
-          eval "$(ssh-agent -s)"
-          trap 'ssh-agent -k >/dev/null' EXIT
-          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" | ssh-add -
-          unset AUR_SSH_PRIVATE_KEY
           install -d -m 700 -o builder -g builder /home/builder/.ssh
           printf '%s\n' "$AUR_SSH_KNOWN_HOSTS" > /home/builder/.ssh/known_hosts
           chown builder:builder /home/builder/.ssh/known_hosts
           chmod 600 /home/builder/.ssh/known_hosts
           chown -R builder:builder "$GITHUB_WORKSPACE"
-          # The agent socket's parent is private; grant the build user access.
-          chown builder:builder "$SSH_AUTH_SOCK" "$(dirname "$SSH_AUTH_SOCK")"
-          sudo --preserve-env=SSH_AUTH_SOCK,AUR_USERNAME,AUR_EMAIL -u builder bash scripts/publish_aur.sh out/PKGBUILD
+          sudo --preserve-env=AUR_SSH_PRIVATE_KEY,AUR_USERNAME,AUR_EMAIL -u builder \
+            bash scripts/with-aur-agent.sh bash scripts/publish_aur.sh out/PKGBUILD
