@@ -34,8 +34,7 @@ In **this repository** configure:
 | --- | --- |
 | Variable `UPSTREAM_REPOSITORY` | `pasical/Everywhere` initially |
 | Secret `AUR_SSH_PRIVATE_KEY` | Dedicated automation SSH private key; register its public key in your AUR account |
-| Secret `AUR_USERNAME` | Git commit author name |
-| Secret `AUR_EMAIL` | Git commit author email |
+| Optional variables `AUR_USERNAME` / `AUR_EMAIL` | Git author override; defaults to the GitHub Actions bot |
 | Variable `AUR_SSH_KNOWN_HOSTS` | Verified `aur.archlinux.org` SSH known_hosts entry |
 
 Use the AUR host entry from a machine on which you have already verified the

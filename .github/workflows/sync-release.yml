@@ -60,8 +60,8 @@ jobs:
       - name: Validate package and push AUR
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          AUR_USERNAME: ${{ secrets.AUR_USERNAME }}
-          AUR_EMAIL: ${{ secrets.AUR_EMAIL }}
+          AUR_USERNAME: ${{ vars.AUR_USERNAME || 'github-actions[bot]' }}
+          AUR_EMAIL: ${{ vars.AUR_EMAIL || '41898282+github-actions[bot]@users.noreply.github.com' }}
           AUR_SSH_KNOWN_HOSTS: ${{ vars.AUR_SSH_KNOWN_HOSTS }}
         shell: bash
         run: |
