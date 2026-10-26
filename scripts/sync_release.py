@@ -13,7 +13,7 @@ import tempfile
 import urllib.request
 
 
-TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)(?:-canary\.([0-9.]+))?\Z")
+TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)(?:-canary\.([0-9]+(?:\.[0-9]+)*))?\Z")
 REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 
 
@@ -208,7 +208,14 @@ def main():
     parser.add_argument("--tag", required=True)
     parser.add_argument("--output", type=Path, default=Path("out"))
     args = parser.parse_args()
+    from release_state import read_policy
+    if args.tag in read_policy(args.destination)["withdrawn_tags"]:
+        print(f"Mirror skipped: {args.tag} was withdrawn. Its recipes remain archived.")
+        return
     mirror(args.source, args.destination, args.tag, args.output)
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+            output.write("ready=true\n")
 
 
 if __name__ == "__main__":

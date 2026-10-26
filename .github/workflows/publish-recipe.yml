@@ -1,0 +1,107 @@
+name: Build archive and publish a recipe
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      publish_aur:
+        type: boolean
+        default: true
+      allow_rollback:
+        type: boolean
+        default: false
+      withdraw_tag:
+        type: string
+        default: ''
+    secrets:
+      AUR_SSH_PRIVATE_KEY:
+        required: false
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    outputs:
+      ready: ${{ steps.generate.outputs.ready }}
+    steps:
+      - name: Prepare Arch build user
+        run: |
+          sed -i '/^\[options\]/a DisableSandbox' /etc/pacman.conf
+          pacman -Syu --noconfirm git openssh python pacman-contrib desktop-file-utils
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: aur-recipe
+          path: out
+      - name: Generate source metadata for retained recipes
+        id: generate
+        shell: bash
+        run: |
+          set -euo pipefail
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          sudo -u builder bash -c '
+            set -euo pipefail
+            for recipe in out/PKGBUILD out/withdrawn/PKGBUILD; do
+              if test -f "$recipe"; then
+                (cd "$(dirname "$recipe")"; makepkg --printsrcinfo > .SRCINFO)
+              fi
+            done
+          '
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+      - name: Validate package and push selected version to AUR
+        if: ${{ inputs.publish_aur }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUR_POLICY_REPOSITORY: ${{ github.repository }}
+          AUR_ALLOW_ROLLBACK: ${{ inputs.allow_rollback }}
+          AUR_PUBLISHED_DIR: ${{ github.workspace }}/out/published
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          AUR_USERNAME: ${{ vars.AUR_USERNAME || 'github-actions[bot]' }}
+          AUR_EMAIL: ${{ vars.AUR_EMAIL || '41898282+github-actions[bot]@users.noreply.github.com' }}
+          AUR_SSH_KNOWN_HOSTS: ${{ vars.AUR_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AUR_SSH_PRIVATE_KEY" || { echo 'Configure AUR_SSH_PRIVATE_KEY.' >&2; exit 1; }
+          test -n "$AUR_SSH_KNOWN_HOSTS" || { echo 'Configure AUR_SSH_KNOWN_HOSTS.' >&2; exit 1; }
+          install -d -m 700 -o builder -g builder /home/builder/.ssh
+          printf '%s\n' "$AUR_SSH_KNOWN_HOSTS" > /home/builder/.ssh/known_hosts
+          chown builder:builder /home/builder/.ssh/known_hosts
+          chmod 600 /home/builder/.ssh/known_hosts
+          sudo --preserve-env=GH_TOKEN,AUR_POLICY_REPOSITORY,AUR_ALLOW_ROLLBACK,AUR_PUBLISHED_DIR,AUR_SSH_PRIVATE_KEY,AUR_USERNAME,AUR_EMAIL \
+            -u builder bash scripts/with-aur-agent.sh bash scripts/publish_aur.sh out/PKGBUILD
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && steps.generate.outcome == 'success' }}
+        with:
+          name: recipe-result
+          path: out/
+          include-hidden-files: true
+          if-no-files-found: error
+  archive:
+    needs: package
+    if: ${{ always() && needs.package.outputs.ready == 'true' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: recipe-result
+          path: out
+      - name: Retain recipes in Git and on the mirror release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: python3 scripts/archive_recipes.py --tag "$RELEASE_TAG"
+      - name: Withdraw release only after AUR replacement and archival succeed
+        if: ${{ needs.package.result == 'success' && inputs.withdraw_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          WITHDRAW_TAG: ${{ inputs.withdraw_tag }}
+        run: python3 scripts/manage_release.py --finalize --tag "$RELEASE_TAG" --withdraw-tag "$WITHDRAW_TAG"

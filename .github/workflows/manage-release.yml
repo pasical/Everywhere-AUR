@@ -1,0 +1,59 @@
+name: Select or withdraw AUR release
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        options: [pin, withdraw, resume]
+        description: Pin a version, withdraw another version, or resume automatic updates
+        required: true
+      tag:
+        type: string
+        description: Public mirror tag to publish and pin (ignored for resume)
+      withdraw_tag:
+        type: string
+        description: Mirror tag to turn into a draft (withdraw only)
+      reason:
+        type: string
+        description: Reason recorded in the withdrawal history
+permissions:
+  contents: read
+concurrency:
+  group: everywhere-release-control
+  cancel-in-progress: false
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      rollback: ${{ steps.plan.outputs.rollback }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Persist policy and prepare the selected archived recipe
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONTROL_ACTION: ${{ inputs.action }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          WITHDRAW_TAG: ${{ inputs.withdraw_tag }}
+          CONTROL_REASON: ${{ inputs.reason }}
+        run: python3 scripts/manage_release.py --action "$CONTROL_ACTION" --tag "$RELEASE_TAG" --withdraw-tag "$WITHDRAW_TAG" --reason "$CONTROL_REASON"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aur-recipe
+          path: out/
+          if-no-files-found: error
+  publish:
+    needs: select
+    permissions:
+      contents: write
+    uses: ./.github/workflows/publish-recipe.yml
+    with:
+      tag: ${{ needs.select.outputs.tag }}
+      publish_aur: true
+      allow_rollback: ${{ needs.select.outputs.rollback == 'true' }}
+      withdraw_tag: ${{ inputs.action == 'withdraw' && inputs.withdraw_tag || '' }}
+    secrets:
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}

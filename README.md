@@ -13,9 +13,14 @@ releases are supported. No scheduled polling or application rebuild is used.
    assets. An uploaded, nonempty x64 tar.zst is required. It mirrors the original
    bytes, pins LICENSE and the icon to the source tag's commit, and publishes a
    release with `mirror.json` and SHA256SUMS. Draft source releases are rejected.
-3. Only after the mirrored files are publicly downloadable, the workflow renders
-   PKGBUILD with per-architecture SHA-256 hashes. An unprivileged Arch build user
-   builds the package and commits PKGBUILD and .SRCINFO to AUR's master branch.
+3. The workflow generates PKGBUILD and .SRCINFO, including when `publish_aur` is
+   disabled. After the mirrored files are public, the selected package is built
+   by an unprivileged Arch user and committed to AUR's master branch.
+4. Generated recipes are committed under `packages/<tag>/generated/`. The exact
+   recipe actually on AUR, including pkgrel and epoch, is retained separately in
+   `packages/<tag>/published/`, with the AUR commit and version in publication.json.
+   Mirror releases also contain PKGBUILD and SRCINFO assets. Git history keeps
+   previous packaging revisions and remains public after a release is withdrawn.
 
 Mirror releases retain the upstream tags and prerelease status. The existing
 `everywhere-bin` follows both channels: its users will receive Canary upgrades.
@@ -25,6 +30,42 @@ prevents older dispatches from downgrading AUR. Same-version packaging changes
 increment pkgrel. Completed mirrors still regenerate the recipe on retry, so an
 AUR failure does not require re-uploading the release. Existing artifacts with
 different bytes are never silently replaced.
+
+## Select, pin or withdraw a version
+
+Use **Actions → Select or withdraw AUR release → Run workflow**:
+
+| action | tag | withdraw_tag | Result |
+| --- | --- | --- | --- |
+| `pin` | A public mirrored version | Empty | Publish that version to AUR and keep it selected |
+| `withdraw` | Replacement public version | Bad version | Pin/publish the replacement, retain both recipes, then turn the bad mirror into a draft |
+| `resume` | Ignored | Empty | Remove the pin and select the highest eligible public mirror |
+
+The selected version must have a public mirror. Withdrawal and selection tags
+must differ. `reason` is kept in `state/aur-policy.json`. Withdrawing a mirror
+does not modify the source repository's release or delete any recipe archive.
+
+Policy is persisted before replacement starts. If building or pushing fails,
+the bad release remains public so AUR's existing URLs are not broken; retry the
+control workflow to complete the operation. It becomes a draft only after the
+replacement is confirmed and both recipes have been retained. Old dispatches
+cannot re-publish a withdrawn mirror. New versions may still be mirrored and
+archived while pinned, but cannot replace the selected AUR version. The publisher
+checks the current policy again just before committing/pushing, and Git rejects
+concurrent stale pushes. Even a pin to an already-current version records an
+empty AUR commit, invalidating automatic pushes that started before the pin.
+
+A deliberate rollback to a lower software version increments `epoch`, so Arch
+sees the repaired package as an upgrade. Subsequent releases retain that epoch;
+ordinary old events still cannot downgrade AUR. For example, `1:0.9.0-1` sorts
+above `0.10.0-1`. The rollback itself only updates packaging; installed clients
+receive it when their AUR helper next updates packages.
+
+The generated recipe can be maintained directly in this repository. A manual
+pin reuses `packages/<tag>/generated/PKGBUILD` when available, then builds it and
+records the exact AUR result. A new upstream sync regenerates the generated
+snapshot from `packaging/PKGBUILD.in`, while Git retains earlier edits. Update
+the template for changes intended to apply to future versions.
 
 ## One-time setup
 
