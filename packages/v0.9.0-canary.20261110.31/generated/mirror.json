@@ -1,0 +1,40 @@
+{
+  "source_repository": "pasical/Everywhere",
+  "source_release_id": 440502329,
+  "source_commit": "c13278ddf4589abe886caf6d405632c13e2d11fa",
+  "tag": "v0.9.0-canary.20261110.31",
+  "upstream_assets": [
+    {
+      "id": 731815530,
+      "name": "Everywhere-Linux-arm64-v0.9.0-canary.20261110.31.deb",
+      "size": 65999522,
+      "digest": "sha256:ef2edc3a656d8b9533431c4c089f80a5442b748ad3b3756f733cd862da62f1cf"
+    },
+    {
+      "id": 731815528,
+      "name": "Everywhere-Linux-arm64-v0.9.0-canary.20261110.31.tar.zst",
+      "size": 66216332,
+      "digest": "sha256:04c1d82a10bd1757f28515e3fffd407fd3ad3efb31e7220f3e002ba09b3a318e"
+    },
+    {
+      "id": 731815531,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261110.31.deb",
+      "size": 68721136,
+      "digest": "sha256:7a5a5c5ddce65f2679824b2318006a6af66c0e3b2b7de0344f9021dfc5c78094"
+    },
+    {
+      "id": 731815527,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261110.31.tar.zst",
+      "size": 68962215,
+      "digest": "sha256:23e40f6f0d5cd01b35051ceac565a4b0faf364f12a2997b96be850015f585517"
+    }
+  ],
+  "sha256": {
+    "Everywhere-Linux-arm64-v0.9.0-canary.20261110.31.deb": "ef2edc3a656d8b9533431c4c089f80a5442b748ad3b3756f733cd862da62f1cf",
+    "Everywhere-Linux-arm64-v0.9.0-canary.20261110.31.tar.zst": "04c1d82a10bd1757f28515e3fffd407fd3ad3efb31e7220f3e002ba09b3a318e",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261110.31.deb": "7a5a5c5ddce65f2679824b2318006a6af66c0e3b2b7de0344f9021dfc5c78094",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261110.31.tar.zst": "23e40f6f0d5cd01b35051ceac565a4b0faf364f12a2997b96be850015f585517",
+    "LICENSE": "1afb97b109ac6dc78fee57f86e854abe75bbdffb12b40d36c91084b12efa96a2",
+    "Everywhere-icon.png": "ef52179d078f3ee23a1eec9ded2dbb8a9529de49dd4412375fea7566f9f83c34"
+  }
+}
