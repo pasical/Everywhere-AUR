@@ -33,7 +33,7 @@ jobs:
         id: mirror
         env:
           GH_TOKEN: ${{ github.token }}
-          UPSTREAM_REPOSITORY: ${{ vars.UPSTREAM_REPOSITORY || 'pasical/Everywhere' }}
+          UPSTREAM_REPOSITORY: ${{ vars.UPSTREAM_REPOSITORY || 'Sylinko/Everywhere' }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: python3 scripts/sync_release.py --tag "$RELEASE_TAG"
       - uses: actions/upload-artifact@v4

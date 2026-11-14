@@ -2,7 +2,7 @@
 
 Event-driven Linux release mirror and maintainer of the existing
 [`everywhere-bin`](https://aur.archlinux.org/packages/everywhere-bin) AUR package.
-The initial trusted source is **pasical/Everywhere**. Both stable and Canary
+The trusted upstream source is **Sylinko/Everywhere**. Both stable and Canary
 releases are supported. No scheduled polling or application rebuild is used.
 
 ## Flow
@@ -73,14 +73,14 @@ In **this repository** configure:
 
 | Setting | Value |
 | --- | --- |
-| Variable `UPSTREAM_REPOSITORY` | `pasical/Everywhere` initially |
+| Variable `UPSTREAM_REPOSITORY` | `Sylinko/Everywhere` |
 | Secret `AUR_SSH_PRIVATE_KEY` | Dedicated automation SSH private key; register its public key in your AUR account |
 | Optional variables `AUR_USERNAME` / `AUR_EMAIL` | Git author override; defaults to the GitHub Actions bot |
 | Variable `AUR_SSH_KNOWN_HOSTS` | Verified `aur.archlinux.org` SSH known_hosts entry |
 
 Use the AUR host entry from a machine on which you have already verified the
 server identity (`ssh-keygen -F aur.archlinux.org` extracts it from known_hosts).
-This is the server's public host key, not your AUR account key. Secrets from the source fork cannot
+This is the server's public host key, not your AUR account key. Secrets from the source repository cannot
 be read back or inherited across an independent workflow dispatch; configure
 them separately here. An unattended key must be usable by ssh-agent without an
 interactive passphrase prompt.
@@ -88,14 +88,14 @@ interactive passphrase prompt.
 The workflow's built-in GITHUB_TOKEN gets `contents: write` only for this
 repository's mirror job. Reading the public source needs no extra token.
 
-In **pasical/Everywhere** configure secret `EVERYWHERE_AUR_DISPATCH_TOKEN`: a
+In **Sylinko/Everywhere** configure secret `EVERYWHERE_AUR_DISPATCH_TOKEN`: a
 fine-grained PAT restricted to **Everywhere-AUR**, with **Actions: write**.
 `aur-publish.yml` uses it to call this repository's workflow_dispatch endpoint.
-The fork's AUR SSH secrets are no longer used by that notification workflow.
+The source repository's AUR SSH secrets are no longer used by that notification workflow.
 
 ## Test and retry
 
-After the Linux tag build completes in the fork, publish its draft as a
+After the Linux tag build completes in the source repository, publish its draft as a
 prerelease. This sends an event automatically. To test mirroring without changing
 the AUR package, use **Actions → Mirror Linux release and update AUR → Run
 workflow**, enter the exact source tag and uncheck `publish_aur`:
@@ -111,7 +111,7 @@ Retry the same tag with `publish_aur=true` after configuring the AUR credentials
 
 ## Moving to Sylinko/Everywhere
 
-Change `UPSTREAM_REPOSITORY` to `Sylinko/Everywhere`. A release event is local to
+`UPSTREAM_REPOSITORY` defaults to `Sylinko/Everywhere`; configure the repository variable to match. A release event is local to
 its repository: the upstream maintainer must install the same dispatch notifier
 and a token permitted to invoke this workflow. Without upstream cooperation,
 strictly passive notification needs an external webhook/event relay; otherwise

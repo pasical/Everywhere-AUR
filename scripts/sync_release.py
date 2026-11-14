@@ -203,7 +203,7 @@ def mirror(source, destination, tag, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", default=os.environ.get("UPSTREAM_REPOSITORY", "pasical/Everywhere"))
+    parser.add_argument("--source", default=os.environ.get("UPSTREAM_REPOSITORY", "Sylinko/Everywhere"))
     parser.add_argument("--destination", default=os.environ.get("GITHUB_REPOSITORY", "pasical/Everywhere-AUR"))
     parser.add_argument("--tag", required=True)
     parser.add_argument("--output", type=Path, default=Path("out"))

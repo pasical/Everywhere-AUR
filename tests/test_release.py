@@ -52,17 +52,17 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             sync.mirror("owner/repo;command", "pasical/Everywhere-AUR", self.tag, Path("out"))
         with self.assertRaises(ValueError):
-            sync.mirror("pasical/Everywhere", "pasical/Everywhere", self.tag, Path("out"))
+            sync.mirror("Sylinko/Everywhere", "Sylinko/Everywhere", self.tag, Path("out"))
 
     def test_draft_release_is_not_mirrored(self):
         with patch.object(sync, "api", return_value={"draft": True}):
             with self.assertRaisesRegex(ValueError, "Publish"):
-                sync.mirror("pasical/Everywhere", "pasical/Everywhere-AUR", self.tag, Path("out"))
+                sync.mirror("Sylinko/Everywhere", "pasical/Everywhere-AUR", self.tag, Path("out"))
 
     def test_completed_mirror_still_generates_recipe_for_aur_retry(self):
         hashes = {"LICENSE": "a" * 64, "Everywhere-icon.png": "b" * 64,
                   self.assets()[0]["name"]: "c" * 64}
-        manifest = {"source_repository": "pasical/Everywhere", "source_release_id": 10,
+        manifest = {"source_repository": "Sylinko/Everywhere", "source_release_id": 10,
                     "source_commit": "d" * 40, "tag": self.tag,
                     "upstream_assets": sync.fingerprint(sync.linux_assets({"assets": self.assets()}, self.tag)), "sha256": hashes}
         mirrored = {"id": 20, "draft": False, "assets": [
@@ -88,7 +88,7 @@ class ReleaseTests(unittest.TestCase):
                 patch.object(sync.urllib.request, "urlopen") as head:
             head.return_value.__enter__.return_value.status = 200
             output = Path(directory) / "out"
-            sync.mirror("pasical/Everywhere", "pasical/Everywhere-AUR", self.tag, output)
+            sync.mirror("Sylinko/Everywhere", "pasical/Everywhere-AUR", self.tag, output)
             self.assertTrue((output / "PKGBUILD").is_file())
             self.assertEqual(head.call_count, len(hashes))
 
@@ -103,7 +103,7 @@ class ReleaseTests(unittest.TestCase):
 
         with patch.object(sync, "api", side_effect=calls), patch.object(sync, "download", side_effect=download):
             with self.assertRaisesRegex(ValueError, "different source"):
-                sync.mirror("pasical/Everywhere", "pasical/Everywhere-AUR", self.tag, Path("out"))
+                sync.mirror("Sylinko/Everywhere", "pasical/Everywhere-AUR", self.tag, Path("out"))
 
     def test_interrupted_draft_is_found_in_release_list(self):
         draft = {"tag_name": self.tag, "id": 20, "draft": True}
@@ -116,9 +116,9 @@ class ReleaseTests(unittest.TestCase):
         png = b"\x89PNG\r\n\x1a\nfixture"
 
         def api(path, method="GET", data=None, optional=False):
-            if path == f"repos/pasical/Everywhere/releases/tags/{self.tag}":
+            if path == f"repos/Sylinko/Everywhere/releases/tags/{self.tag}":
                 return {"id": 10, "draft": False, "prerelease": True,
-                        "html_url": "https://github.com/pasical/Everywhere/releases/tag/" + self.tag,
+                        "html_url": "https://github.com/Sylinko/Everywhere/releases/tag/" + self.tag,
                         "assets": self.assets()}
             if "/commits/" in path:
                 return {"sha": "d" * 40}
@@ -151,7 +151,7 @@ class ReleaseTests(unittest.TestCase):
                 patch.object(sync.urllib.request, "urlopen") as head:
             head.return_value.__enter__.return_value.status = 200
             output = Path(directory) / "out"
-            sync.mirror("pasical/Everywhere", "pasical/Everywhere-AUR", self.tag, output)
+            sync.mirror("Sylinko/Everywhere", "pasical/Everywhere-AUR", self.tag, output)
             self.assertEqual(events[0], "create-draft")
             self.assertEqual(events[-1], "publish")
             self.assertGreater(events.count("upload"), 2)
