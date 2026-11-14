@@ -7,6 +7,8 @@ mkdir -p "$fixture/payload" "$fixture/download" "$fixture/build"
 printf '#!/bin/sh\necho recipe-fixture\n' > "$fixture/payload/Everywhere"
 cp "$fixture/payload/Everywhere" "$fixture/payload/Everywhere.Watchdog"
 chmod +x "$fixture/payload/"*
+# AUR packages must retain the bundled updater and provide its runtime and CLI alias.
+printf 'print("updater-fixture")\n' > "$fixture/payload/linux-update.py"
 tag=v1.2.3-canary.20261026.1
 for arch in x64 arm64; do
     bsdtar -caf "$fixture/download/Everywhere-Linux-${arch}-${tag}.tar.zst" -C "$fixture/payload" .
@@ -33,12 +35,15 @@ makepkg --printsrcinfo > .SRCINFO
 bash -c 'source ./PKGBUILD; pacman -Sp --print-format %n "${depends[@]}" >/dev/null'
 grep -q 'arch = x86_64' .SRCINFO
 grep -q 'arch = aarch64' .SRCINFO
+grep -q 'depends = python' .SRCINFO
 test "$(vercmp 1.2.3canary.20261026.1 1.2.3)" = -1
 test "$(vercmp 1.2.3canary.20261026.2 1.2.3canary.20261026.1)" = 1
 test "$(vercmp 1.2.4canary.1 1.2.3)" = 1
 makepkg --nodeps --noconfirm --cleanbuild
 package=$(find . -maxdepth 1 -name 'everywhere-bin-*.pkg.tar.zst' -print -quit)
 bsdtar -tf "$package" | grep -q '^opt/Everywhere/Everywhere.Watchdog$'
-bsdtar -xf "$package" usr/share/applications/Everywhere.desktop
+bsdtar -xf "$package" usr/share/applications/Everywhere.desktop opt/Everywhere/linux-update.py usr/bin/ew
+test "$(readlink usr/bin/ew)" = /opt/Everywhere/Everywhere
+cmp opt/Everywhere/linux-update.py "$fixture/payload/linux-update.py"
 desktop-file-validate usr/share/applications/Everywhere.desktop
 echo 'Arch package construction, checksums, metadata and version ordering passed.'
