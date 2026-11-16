@@ -1,0 +1,26 @@
+{
+  "source_repository": "Sylinko/Everywhere",
+  "source_release_id": 446893300,
+  "source_commit": "9b2a98da2f65b9a9bccea4de5c5202caa3950098",
+  "tag": "v0.9.0-canary.20261116.28",
+  "upstream_assets": [
+    {
+      "id": 754428547,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261116.28.deb",
+      "size": 71447694,
+      "digest": "sha256:2c580449da76f2f106b87396d2a87cd0a1c162e042455f8394d25d3d89ec7a9e"
+    },
+    {
+      "id": 754428544,
+      "name": "Everywhere-Linux-x64-v0.9.0-canary.20261116.28.tar.zst",
+      "size": 71384910,
+      "digest": "sha256:08b0b9cb07620b9ce82f676e01b0b134687768ca78535c030115d3b705654a60"
+    }
+  ],
+  "sha256": {
+    "Everywhere-Linux-x64-v0.9.0-canary.20261116.28.deb": "2c580449da76f2f106b87396d2a87cd0a1c162e042455f8394d25d3d89ec7a9e",
+    "Everywhere-Linux-x64-v0.9.0-canary.20261116.28.tar.zst": "08b0b9cb07620b9ce82f676e01b0b134687768ca78535c030115d3b705654a60",
+    "LICENSE": "1afb97b109ac6dc78fee57f86e854abe75bbdffb12b40d36c91084b12efa96a2",
+    "Everywhere-icon.png": "ef52179d078f3ee23a1eec9ded2dbb8a9529de49dd4412375fea7566f9f83c34"
+  }
+}
