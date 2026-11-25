@@ -1,0 +1,26 @@
+{
+  "source_repository": "Sylinko/Everywhere",
+  "source_release_id": 457940508,
+  "source_commit": "842ac93d5823eb571075e5ae5df83540108be6d5",
+  "tag": "v0.9.0",
+  "upstream_assets": [
+    {
+      "id": 791042334,
+      "name": "Everywhere-Linux-x64-v0.9.0.deb",
+      "size": 71013704,
+      "digest": "sha256:3901bb8a13889e5794cd7728e689c38b1ad05d1737180a45c89267c962d0e2d3"
+    },
+    {
+      "id": 791042338,
+      "name": "Everywhere-Linux-x64-v0.9.0.tar.zst",
+      "size": 71897839,
+      "digest": "sha256:5d5916b97b9fe428e3c0d50380a5c4e4140cb6203b58a2afad50221720e73eae"
+    }
+  ],
+  "sha256": {
+    "Everywhere-Linux-x64-v0.9.0.deb": "3901bb8a13889e5794cd7728e689c38b1ad05d1737180a45c89267c962d0e2d3",
+    "Everywhere-Linux-x64-v0.9.0.tar.zst": "5d5916b97b9fe428e3c0d50380a5c4e4140cb6203b58a2afad50221720e73eae",
+    "LICENSE": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "Everywhere-icon.png": "ef52179d078f3ee23a1eec9ded2dbb8a9529de49dd4412375fea7566f9f83c34"
+  }
+}
